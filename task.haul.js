@@ -6,7 +6,7 @@ var taskHaul = {
         //var target = Game.spawns['Arendelle'];
         //var target = creep.room.controller;
         var target;
-        needMoreSnowflakes = Object.keys(Game.creeps).length < 3;
+        needMoreSnowflakes = Object.keys(Game.creeps).length < Memory.MAX_CREEPS;
         if(needMoreSnowflakes)
             target = Game.spawns['Arendelle'];
         else

@@ -1,3 +1,5 @@
+Memory.MAX_CREEPS = 3;
+
 var taskHarvest = require('task.harvest');
 var taskHaul = require('task.haul');
 
@@ -22,7 +24,7 @@ module.exports.loop = function () {
         tasks[creep.memory.task](creep);
     }
     
-    needMoreSnowflakes = Object.keys(Game.creeps).length < 3;
+    needMoreSnowflakes = Object.keys(Game.creeps).length < Memory.MAX_CREEPS;
     canCreateSnowflake = Game.spawns['Arendelle'].canCreateCreep([MOVE,MOVE,WORK,CARRY]) == OK;
     if(needMoreSnowflakes && canCreateSnowflake) {
         Game.spawns['Arendelle'].createCreep( [MOVE,MOVE,WORK,CARRY], 'Snowflake' + (Object.keys(Game.creeps).length + 1) );
