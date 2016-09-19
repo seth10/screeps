@@ -1,4 +1,6 @@
 Memory.MAX_CREEPS = 3;
+Memory.SPAWN = 0;
+//Memory.SOURCE = Game.getObjectById('579fa8b80700be0674d2e2e8');
 
 var taskHarvest = require('task.harvest');
 var taskHaul = require('task.haul');
