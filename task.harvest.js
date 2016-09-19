@@ -2,11 +2,11 @@ var taskHarvest = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
-        var sources = creep.room.find(FIND_SOURCES);
+        var source = creep.room.find(FIND_SOURCES)[0];
         
-        status = creep.harvest(sources[0]);
+        status = creep.harvest(source);
         if(status == ERR_NOT_IN_RANGE) {
-            creep.moveTo(sources[0]);
+            creep.moveTo(source);
         }
         //creep.say('working: '+status);
     }
