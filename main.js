@@ -23,7 +23,9 @@ module.exports.loop = function () {
         tasks[creep.memory.task](creep);
     }
     
-    if(Game.spawns['Arendelle'].canCreateCreep([MOVE,MOVE,WORK,CARRY]) == OK) {
-        //Game.spawns['Arendelle'].createCreep( [MOVE,MOVE,WORK,CARRY], 'Snowflake' + (Object.keys(Game.creeps).length + 1) );
+    needMoreSnowflakes = Object.keys(Game.creeps).length < 3;
+    canCreateSnowflake = Game.spawns['Arendelle'].canCreateCreep([MOVE,MOVE,WORK,CARRY]) == OK;
+    if(needMoreSnowflakes && canCreateSnowflake) {
+        Game.spawns['Arendelle'].createCreep( [MOVE,MOVE,WORK,CARRY], 'Snowflake' + (Object.keys(Game.creeps).length + 1) );
     }
 }
