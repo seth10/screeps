@@ -1,5 +1,6 @@
 Memory.MAX_CREEPS = 3;
 Memory.WARN_RATE = 0.9; // send a warning notification when the downgrade timer has reached 90% (meaning 10% lost / ticks passed)
+Memory.notified; // whether a notification has been sent for this instance of a downgrade timer drop
 
 var taskHarvest = require('task.harvest');
 var taskHaul = require('task.haul');
@@ -35,8 +36,12 @@ module.exports.loop = function () {
 }
 
 function notifications() {
-    if( (Game.rooms.W53N6.controller.level == 2 && Game.rooms.W53N6.controller.ticksToDowngrade < 5000 * Memory.WARN_RATE) ||
-        (Game.rooms.W53N6.controller.level == 3 && Game.rooms.W53N6.controller.ticksToDowngrade < 10000 * Memory.WARN_RATE) ) {
-        Game.notify('Room controller at level ' + Game.rooms.W53N6.controller.level + ' has a downgrade timer at ' + Game.rooms.W53N6.controller.ticksToDowngrade, 15);
+    if( !Memory.notified && (Game.rooms.W53N6.controller.level == 2 && Game.rooms.W53N6.controller.ticksToDowngrade <= 5000 * Memory.WARN_RATE) ||
+                            (Game.rooms.W53N6.controller.level == 3 && Game.rooms.W53N6.controller.ticksToDowngrade <= 10000 * Memory.WARN_RATE) ) {
+        Game.notify('Room controller at level ' + Game.rooms.W53N6.controller.level + ' has a downgrade timer at ' + Game.rooms.W53N6.controller.ticksToDowngrade);
+        Memory.notified = true; // notification has been sent, don't keep sending one every tick
+    } else if( Memory.notified && (Game.rooms.W53N6.controller.level == 2 && Game.rooms.W53N6.controller.ticksToDowngrade > 5000 * Memory.WARN_RATE) ||
+                                  (Game.rooms.W53N6.controller.level == 3 && Game.rooms.W53N6.controller.ticksToDowngrade > 10000 * Memory.WARN_RATE) ) {
+        Memory.notified = false; // downgrade timer has gone above warning rate, reset notification sent indicator so a notification will be sent next time it drops
     }
 }
