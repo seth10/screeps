@@ -13,6 +13,14 @@ module.exports.loop = function () {
     for(var name in Game.creeps) {
         var creep = Game.creeps[name];
         
+        if(creep.ticksToLive == 1) {
+            console.log('Always in our memories, ' + creep.name);
+            if(Memory.graveyard == undefined)
+                Memory.graveyard = [];
+            Memory.graveyard.push(creep.name);
+            delete Memory.creeps[creep.name];
+        }
+        
         //update task
         if(creep.memory.task == 'harvest' && creep.carry.energy == creep.carryCapacity)
             creep.memory.task = 'haul';
