@@ -1,6 +1,8 @@
 Memory.MAX_CREEPS = 3;
 Memory.WARN_RATE = 0.9; // send a warning notification when the downgrade timer has reached 90% (meaning 10% lost / ticks passed)
 Memory.notified; // whether a notification has been sent for this instance of a downgrade timer drop
+Memory.REASSURE_INTERVAL = 5000;
+Memory.lastAccidentTick;
 
 var taskHarvest = require('task.harvest');
 var taskHaul = require('task.haul');
@@ -43,5 +45,14 @@ function notifications() {
     } else if( Memory.notified && (Game.rooms.W53N6.controller.level == 2 && Game.rooms.W53N6.controller.ticksToDowngrade > 5000 * Memory.WARN_RATE) ||
                                   (Game.rooms.W53N6.controller.level == 3 && Game.rooms.W53N6.controller.ticksToDowngrade > 10000 * Memory.WARN_RATE) ) {
         Memory.notified = false; // downgrade timer has gone above warning rate, reset notification sent indicator so a notification will be sent next time it drops
+    }
+    
+    if(!Memory.lastAccidentTick) {
+        //Memory.lastAccidentTick = Game.time;
+        Memory.lastAccidentTick = 13776040; // my first tick in my first room
+    }
+    ticksSinceLastAccident = Game.time - Memory.lastAccidentTick;
+    if( ticksSinceLastAccident > 0 && (ticksSinceLastAccident % Memory.REASSURE_INTERVAL == 0) ) {
+        Game.notify('Everything is A-OK 👍\nTicks since last accident: ' + ticksSinceLastAccident, 0);
     }
 }
