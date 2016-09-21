@@ -1,4 +1,5 @@
 Memory.MAX_CREEPS = 3;
+Memory.WARN_RATE = 0.9; // send a warning notification when the downgrade timer has reached 90% (meaning 10% lost / ticks passed)
 
 var taskHarvest = require('task.harvest');
 var taskHaul = require('task.haul');
@@ -28,5 +29,14 @@ module.exports.loop = function () {
     canCreateSnowflake = Game.spawns['Arendelle'].canCreateCreep([MOVE,MOVE,WORK,CARRY]) == OK;
     if(needMoreSnowflakes && canCreateSnowflake) {
         Game.spawns['Arendelle'].createCreep( [MOVE,MOVE,WORK,CARRY] );
+    }
+    
+    notifications();
+}
+
+function notifications() {
+    if( (Game.rooms.W53N6.controller.level == 2 && Game.rooms.W53N6.controller.ticksToDowngrade < 5000 * Memory.WARN_RATE) ||
+        (Game.rooms.W53N6.controller.level == 3 && Game.rooms.W53N6.controller.ticksToDowngrade < 10000 * Memory.WARN_RATE) ) {
+        Game.notify('Room controller at level ' + Game.rooms.W53N6.controller.level + ' has a downgrade timer at ' + Game.rooms.W53N6.controller.ticksToDowngrade, 15);
     }
 }
