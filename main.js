@@ -27,6 +27,6 @@ module.exports.loop = function () {
     needMoreSnowflakes = Object.keys(Game.creeps).length < Memory.MAX_CREEPS;
     canCreateSnowflake = Game.spawns['Arendelle'].canCreateCreep([MOVE,MOVE,WORK,CARRY]) == OK;
     if(needMoreSnowflakes && canCreateSnowflake) {
-        Game.spawns['Arendelle'].createCreep( [MOVE,MOVE,WORK,CARRY], 'Snowflake' + (Object.keys(Game.creeps).length + 1) );
+        Game.spawns['Arendelle'].createCreep( [MOVE,MOVE,WORK,CARRY] );
     }
 }
