@@ -1,4 +1,4 @@
-Memory.MAX_CREEPS = 3;
+Memory.MAX_CREEPS = 5;
 
 var taskHarvest = require('task.harvest');
 var taskHaul = require('task.haul');
