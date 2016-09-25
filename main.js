@@ -1,4 +1,4 @@
-Memory.MAX_CREEPS = 5;
+Memory.MAX_CREEPS = 3;
 Memory.WARN_RATE = 0.9; // send a warning notification when the downgrade timer has reached 90% (meaning 10% lost / ticks passed)
 if(Memory.notified == undefined) // whether a notification has been sent for this instance of a downgrade timer drop
     Memory.notified = false;
