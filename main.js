@@ -9,11 +9,13 @@ if(Memory.ticksSinceLastAccident == undefined)
 var taskHarvest = require('task.harvest');
 var taskHaul = require('task.haul');
 var taskBuild = require('task.build');
+var taskHarvestAdjoiningSource = require('task.harvestAdjoiningSource');
 
 var tasks = {
     'harvest': taskHarvest.run,
     'haul': taskHaul.run,
-    'build': taskBuild.run
+    'build': taskBuild.run,
+    'harvestAdjoiningSource': taskHarvestAdjoiningSource.run
 }
 
 module.exports.loop = function () {
@@ -22,7 +24,7 @@ module.exports.loop = function () {
         var creep = Game.creeps[name];
         
         //update task
-        if(creep.memory.task == 'harvest' && creep.carry.energy == creep.carryCapacity) {
+        if((creep.memory.task == 'harvest' || (creep.memory.task == 'harvestAdjoiningSource' && creep.room.name == 'W53N6')) && creep.carry.energy == creep.carryCapacity) {
             var somecreepHauling = false;
             for (var n in Game.creeps)
                 if (Game.creeps[n].memory.task == 'haul')
@@ -32,8 +34,16 @@ module.exports.loop = function () {
             else
                 creep.memory.task = 'build';
         }
-        if((creep.memory.task == 'haul' || creep.memory.task == 'build') && creep.carry.energy == 0)
-            creep.memory.task = 'harvest';
+        if((creep.memory.task == 'haul' || creep.memory.task == 'build') && creep.carry.energy == 0) {
+            var somecreepHarvestingAdjoiningSource = false;
+            for (var n in Game.creeps)
+                if (Game.creeps[n].memory.task == 'harvestAdjoiningSource')
+                    somecreepHarvestingAdjoiningSource = true;
+            if (somecreepHarvestingAdjoiningSource)
+                creep.memory.task = 'harvest';
+            else
+                creep.memory.task = 'harvestAdjoiningSource';
+        }
         if(!creep.memory.task) //default
             creep.memory.task = 'harvest';
         
