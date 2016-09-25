@@ -27,7 +27,7 @@ module.exports.loop = function () {
             for (var n in Game.creeps)
                 if (Game.creeps[n].memory.task == 'haul')
                     somecreepHauling = true;
-            if (!somecreepHauling)
+            if (!somecreepHauling || !creep.room.find(FIND_CONSTRUCTION_SITES))
                 creep.memory.task = 'haul';
             else
                 creep.memory.task = 'build';
