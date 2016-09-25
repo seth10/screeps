@@ -45,13 +45,13 @@ module.exports.loop = function () {
 }
 
 function notifications() {
-    if(Game.rooms.W53N6.controller.ticksToDowngrade <= 10000 * Memory.WARN_RATE) {
+    if(Game.rooms.W53N6.controller.ticksToDowngrade <= CONTROLLER_DOWNGRADE[Game.rooms.W53N6.controller.level] * Memory.WARN_RATE) {
         if(Memory.notified == false) {
             Game.notify('Room controller at level ' + Game.rooms.W53N6.controller.level + ' has a downgrade timer at ' + Game.rooms.W53N6.controller.ticksToDowngrade);
             Memory.notified = true;
         }
         Memory.ticksSinceLastAccident = 0; // ;(
-    } else if(Game.rooms.W53N6.controller.ticksToDowngrade > 10000 * Memory.WARN_RATE) {
+    } else if(Game.rooms.W53N6.controller.ticksToDowngrade > CONTROLLER_DOWNGRADE[Game.rooms.W53N6.controller.level] * Memory.WARN_RATE) {
         if(Memory.notified == true) {
             Memory.notified = false;
         }
