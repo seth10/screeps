@@ -1,4 +1,4 @@
-Memory.MAX_CREEPS = 4;
+Memory.MAX_CREEPS = 6;
 Memory.WARN_RATE = 0.9; // send a warning notification when the downgrade timer has reached 90% (meaning 10% lost / ticks passed)
 if(Memory.notified == undefined) // whether a notification has been sent for this instance of a downgrade timer drop
     Memory.notified = false;
@@ -29,20 +29,20 @@ module.exports.loop = function () {
             for (var n in Game.creeps)
                 if (Game.creeps[n].memory.task == 'haul')
                     somecreepHauling = true;
-            if (!somecreepHauling || !creep.room.find(FIND_CONSTRUCTION_SITES))
+            if (!somecreepHauling || creep.room.find(FIND_CONSTRUCTION_SITES).length == 0)
                 creep.memory.task = 'haul';
             else
                 creep.memory.task = 'build';
         }
         if((creep.memory.task == 'haul' || creep.memory.task == 'build') && creep.carry.energy == 0) {
-            var somecreepHarvestingAdjoiningSource = false;
+            var creepsHarvestingAdjoiningSource = 0;
             for (var n in Game.creeps)
                 if (Game.creeps[n].memory.task == 'harvestAdjoiningSource')
-                    somecreepHarvestingAdjoiningSource = true;
-            if (somecreepHarvestingAdjoiningSource)
-                creep.memory.task = 'harvest';
-            else
+                    creepsHarvestingAdjoiningSource++;
+            if (creepsHarvestingAdjoiningSource < 2)
                 creep.memory.task = 'harvestAdjoiningSource';
+            else
+                creep.memory.task = 'harvest';
         }
         if(!creep.memory.task) //default
             creep.memory.task = 'harvest';
