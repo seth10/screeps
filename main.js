@@ -39,7 +39,7 @@ module.exports.loop = function () {
             for (var n in Game.creeps)
                 if (Game.creeps[n].memory.task == 'harvestAdjoiningSource')
                     creepsHarvestingAdjoiningSource++;
-            if (creepsHarvestingAdjoiningSource < 2)
+            if (creepsHarvestingAdjoiningSource < 2 && creep.ticksToLive > 350)
                 creep.memory.task = 'harvestAdjoiningSource';
             else
                 creep.memory.task = 'harvest';
