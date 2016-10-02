@@ -1,35 +1,36 @@
-Memory.MAX_CREEPS = 6;
+Memory.MAX_CREEPS = 12;
 Memory.WARN_RATE = 0.9; // send a warning notification when the downgrade timer has reached 90% (meaning 10% lost / ticks passed)
-if(Memory.notified == undefined) // whether a notification has been sent for this instance of a downgrade timer drop
+if (Memory.notified == undefined) // whether a notification has been sent for this instance of a downgrade timer drop
     Memory.notified = false;
 Memory.REASSURE_INTERVAL = 5000;
-if(Memory.ticksSinceLastAccident == undefined)
+if (Memory.ticksSinceLastAccident == undefined)
     Memory.ticksSinceLastAccident = Game.time - 13776040; // my first tick in my first room
 
-var taskHarvest = require('task.harvest');
-var taskHaul = require('task.haul');
-var taskBuild = require('task.build');
+let taskHarvest = require('task.harvest');
+let taskHaul = require('task.haul');
+let taskBuild = require('task.build');
 
-var tasks = {
+let tasks = {
     'harvest': taskHarvest.run,
     'haul': taskHaul.run,
     'build': taskBuild.run
-}
+};
 
 module.exports.loop = function () {
-
-    for(var name in Game.creeps) {
-        var creep = Game.creeps[name];
-
-        if(!creep.memory.targetSource) // old or broken creep
+    
+    for (let name in Game.creeps) {
+        let creep = Game.creeps[name];
+        
+        // fix missing memory values
+        if (!creep.memory.targetSource)
             creep.memory.targetSource = Game.spawns['Arendelle'].room.find(FIND_SOURCES)[0].id;
-        if(!creep.memory.task) //default
+        if (!creep.memory.task)
             creep.memory.task = 'harvest';
         
-        //update task
-        if(creep.memory.task == 'harvest' && creep.carry.energy == creep.carryCapacity) {
+        // update task
+        if (creep.memory.task == 'harvest' && creep.carry.energy == creep.carryCapacity) {
             var somecreepHauling = false;
-            for (var n in Game.creeps)
+            for (let n in Game.creeps)
                 if (Game.creeps[n].memory.task == 'haul')
                     somecreepHauling = true;
             if (!somecreepHauling || creep.room.find(FIND_CONSTRUCTION_SITES).length == 0)
@@ -37,9 +38,8 @@ module.exports.loop = function () {
             else
                 creep.memory.task = 'build';
         }
-        if((creep.memory.task == 'haul' || creep.memory.task == 'build') && creep.carry.energy == 0) {
+        if ((creep.memory.task == 'haul' || creep.memory.task == 'build') && creep.carry.energy == 0)
             creep.memory.task = 'harvest';
-        }
         
         tasks[creep.memory.task](creep);
     }
@@ -50,21 +50,21 @@ module.exports.loop = function () {
     
     cleanMemory();
     
-}
+};
 
 function spawnCreeps() {
-    needMoreSnowflakes = Object.keys(Game.creeps).length < Memory.MAX_CREEPS;
-    if(!needMoreSnowflakes)
+    let needMoreSnowflakes = Object.keys(Game.creeps).length < Memory.MAX_CREEPS;
+    if (!needMoreSnowflakes)
         return;
-        
-    // near: 579fa8b80700be0674d2e2e8
-    // far: 579fa8c90700be0674d2e46e
+    
+    // ..b8..2e8 -> near  `Game.spawns['Arendelle'].room.find(FIND_SOURCES)[0].id;`
+    // ..c9..46e -> far  `Game.rooms[Game.map.describeExits(Game.spawns['Arendelle'].room.name)[RIGHT]].find(FIND_SOURCES)[0].id;`
     var creepsHarvestingAdjoiningSource = 0;
-    for(var n in Game.creeps)
-        if(Game.creeps[n].memory.targetSource == '579fa8c90700be0674d2e46e')
+    for (let n in Game.creeps)
+        if (Game.creeps[n].memory.targetSource == '579fa8c90700be0674d2e46e')
             creepsHarvestingAdjoiningSource++;
     
-    if(creepsHarvestingAdjoiningSource < 2)
+    if (creepsHarvestingAdjoiningSource < 7)
         Game.spawns['Arendelle'].createCreep([MOVE,MOVE,WORK,CARRY,CARRY], {'targetSource': '579fa8c90700be0674d2e46e'});
     else
         Game.spawns['Arendelle'].createCreep([MOVE,WORK,WORK,CARRY], {'targetSource': '579fa8b80700be0674d2e2e8'});
@@ -72,26 +72,27 @@ function spawnCreeps() {
 }
 
 function notifications() {
-    if(Game.rooms.W53N6.controller.ticksToDowngrade <= CONTROLLER_DOWNGRADE[Game.rooms.W53N6.controller.level] * Memory.WARN_RATE) {
-        if(Memory.notified == false) {
-            Game.notify('Room controller at level ' + Game.rooms.W53N6.controller.level + ' has a downgrade timer at ' + Game.rooms.W53N6.controller.ticksToDowngrade);
+    let ticksToDowngrade = Game.rooms.W53N6.controller.ticksToDowngrade;
+    let tickThreshold = CONTROLLER_DOWNGRADE[Game.rooms.W53N6.controller.level] * Memory.WARN_RATE;
+    if (ticksToDowngrade <= tickThreshold) {
+        if (Memory.notified == false) {
+            Game.notify('Room controller at level ' + Game.rooms.W53N6.controller.level + ' in room ' + Game.rooms.W53N6.name + ' has a downgrade timer at ' + ticksToDowngrade);
             Memory.notified = true;
         }
         Memory.ticksSinceLastAccident = 0; // ;(
-    } else if(Game.rooms.W53N6.controller.ticksToDowngrade > CONTROLLER_DOWNGRADE[Game.rooms.W53N6.controller.level] * Memory.WARN_RATE) {
-        if(Memory.notified == true) {
+    } else if (ticksToDowngrade > tickThreshold) {
+        if (Memory.notified == true)
             Memory.notified = false;
-        }
         Memory.ticksSinceLastAccident++;
     }
     
-    if( Memory.ticksSinceLastAccident > 0 && (Memory.ticksSinceLastAccident % Memory.REASSURE_INTERVAL == 0) ) {
+    if (Memory.ticksSinceLastAccident > 0 && (Memory.ticksSinceLastAccident % Memory.REASSURE_INTERVAL == 0)) {
         Game.notify('Everything is A-OK 👍\nTicks since last accident: ' + Memory.ticksSinceLastAccident, 0);
     }
 }
 
 function cleanMemory() {
-    for(var creep in Memory.creeps)
-        if(Game.creeps[creep] == undefined)
+    for (let creep in Memory.creeps)
+        if (Game.creeps[creep] == undefined)
             delete Memory.creeps[creep];
 }

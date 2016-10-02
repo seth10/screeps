@@ -1,9 +1,10 @@
-var taskBuild = {
-
+let taskBuild = {
+    
     /** @param {Creep} creep **/
-    run: function(creep) {
-        var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
-        if(creep.build(targets[0]) == ERR_NOT_IN_RANGE)
+    run: function (creep) {
+        let targets = creep.room.find(FIND_CONSTRUCTION_SITES);
+        let status = creep.build(targets[0]);
+        if (status == ERR_NOT_IN_RANGE)
             creep.moveTo(targets[0]);
 	}
 };
