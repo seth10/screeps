@@ -10,12 +10,10 @@ var taskHaul = {
         if(needMoreSnowflakes)
             target = Game.spawns['Arendelle'];
         else
-            target = creep.room.controller;
+            target = Game.rooms.W53N6.controller;
         status = creep.transfer(target, RESOURCE_ENERGY);
-        if(status == ERR_NOT_IN_RANGE) {
+        if(status == ERR_NOT_IN_RANGE || status == ERR_INVALID_TARGET)
             creep.moveTo(target);
-        }
-        //creep.say('carrying: '+status);
     }
 };
 

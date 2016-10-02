@@ -9,22 +9,25 @@ if(Memory.ticksSinceLastAccident == undefined)
 var taskHarvest = require('task.harvest');
 var taskHaul = require('task.haul');
 var taskBuild = require('task.build');
-var taskHarvestAdjoiningSource = require('task.harvestAdjoiningSource');
 
 var tasks = {
     'harvest': taskHarvest.run,
     'haul': taskHaul.run,
-    'build': taskBuild.run,
-    'harvestAdjoiningSource': taskHarvestAdjoiningSource.run
+    'build': taskBuild.run
 }
 
 module.exports.loop = function () {
 
     for(var name in Game.creeps) {
         var creep = Game.creeps[name];
+
+        if(!creep.memory.targetSource) // old or broken creep
+            creep.memory.targetSource = Game.spawns['Arendelle'].room.find(FIND_SOURCES)[0].id;
+        if(!creep.memory.task) //default
+            creep.memory.task = 'harvest';
         
         //update task
-        if((creep.memory.task == 'harvest' || (creep.memory.task == 'harvestAdjoiningSource' && creep.room.name == 'W53N6')) && creep.carry.energy == creep.carryCapacity) {
+        if(creep.memory.task == 'harvest' && creep.carry.energy == creep.carryCapacity) {
             var somecreepHauling = false;
             for (var n in Game.creeps)
                 if (Game.creeps[n].memory.task == 'haul')
@@ -35,33 +38,37 @@ module.exports.loop = function () {
                 creep.memory.task = 'build';
         }
         if((creep.memory.task == 'haul' || creep.memory.task == 'build') && creep.carry.energy == 0) {
-            var creepsHarvestingAdjoiningSource = 0;
-            for (var n in Game.creeps)
-                if (Game.creeps[n].memory.task == 'harvestAdjoiningSource')
-                    creepsHarvestingAdjoiningSource++;
-            if (creepsHarvestingAdjoiningSource < 2 && creep.ticksToLive > 350)
-                creep.memory.task = 'harvestAdjoiningSource';
-            else
-                creep.memory.task = 'harvest';
-        }
-        if(!creep.memory.task) //default
             creep.memory.task = 'harvest';
+        }
         
         tasks[creep.memory.task](creep);
     }
     
-    needMoreSnowflakes = Object.keys(Game.creeps).length < Memory.MAX_CREEPS;
-    canCreateSnowflake = Game.spawns['Arendelle'].canCreateCreep([MOVE,MOVE,WORK,CARRY,CARRY]) == OK;
-    if(needMoreSnowflakes && canCreateSnowflake) {
-        Game.spawns['Arendelle'].createCreep( [MOVE,MOVE,WORK,CARRY,CARRY] );
-    }
+    spawnCreeps();
     
     notifications();
     
-    for(var creep in Memory.creeps)
-        if(Game.creeps[creep] == undefined)
-            delete Memory.creeps[creep];
+    cleanMemory();
     
+}
+
+function spawnCreeps() {
+    needMoreSnowflakes = Object.keys(Game.creeps).length < Memory.MAX_CREEPS;
+    if(!needMoreSnowflakes)
+        return;
+        
+    // near: 579fa8b80700be0674d2e2e8
+    // far: 579fa8c90700be0674d2e46e
+    var creepsHarvestingAdjoiningSource = 0;
+    for(var n in Game.creeps)
+        if(Game.creeps[n].memory.targetSource == '579fa8c90700be0674d2e46e')
+            creepsHarvestingAdjoiningSource++;
+    
+    if(creepsHarvestingAdjoiningSource < 2)
+        Game.spawns['Arendelle'].createCreep([MOVE,MOVE,WORK,CARRY,CARRY], {'targetSource': '579fa8c90700be0674d2e46e'});
+    else
+        Game.spawns['Arendelle'].createCreep([MOVE,WORK,WORK,CARRY], {'targetSource': '579fa8b80700be0674d2e2e8'});
+    // if spawning fails, this method will be called again next tick, repeated until the source has enough energy
 }
 
 function notifications() {
@@ -81,4 +88,10 @@ function notifications() {
     if( Memory.ticksSinceLastAccident > 0 && (Memory.ticksSinceLastAccident % Memory.REASSURE_INTERVAL == 0) ) {
         Game.notify('Everything is A-OK 👍\nTicks since last accident: ' + Memory.ticksSinceLastAccident, 0);
     }
+}
+
+function cleanMemory() {
+    for(var creep in Memory.creeps)
+        if(Game.creeps[creep] == undefined)
+            delete Memory.creeps[creep];
 }
