@@ -21,7 +21,7 @@
 
 /**
  * Find the best set of body parts for a creep. This is intended for a basic harvesting creep with only WORK, CARRY, and MOVE parts.
- * @param {StructureSpawn} spawn - The spawner which will be spawning the creep, used to call spawn.room.energyCapacityAvailable.
+ * @param {(StructureSpawn|number)} spawn - The spawner which will be spawning the creep, used to call spawn.room.energyCapacityAvailable, or an explicit number of energy capacity
  * @param {number} distance - Distance of path betweem source and controller.
  * @param {boolean} upgradeController - True if the creep will be transfering energy to the room controller (add carry to time) or spawn (dumps all energy in one tick).
  * @returns {Object.<string, number>} best - Information about the best configuration of body parts found.
@@ -31,7 +31,11 @@
  * @returns {number} best.move - The number of MOVE parts the creep should adopt.
  */
 module.exports.calculateOptimalBodyPartSet = function(spawn, distance, upgradeController = true) {
-    let energyCapacity = spawn.room.energyCapacityAvailable;
+    var energyCapacity = 0;
+    if (spawn && spawn.structureType && spawn.structureType == 'spawn')
+        energyCapacity = spawn.room.energyCapacityAvailable;
+    else if (typeof spawn === 'number')
+        energyCapacity = spawn;
     
     var best = {efficiency:0, work:0, carry:0, move:0};
     for (let work = 1; work <= (energyCapacity - 1*BODYPART_COST[CARRY] - 1*BODYPART_COST[MOVE]) / BODYPART_COST[WORK]; work++) {
